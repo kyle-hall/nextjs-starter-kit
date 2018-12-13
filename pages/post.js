@@ -1,18 +1,25 @@
 
 import { withRouter } from 'next/router'
+import fetch from 'isomorphic-unfetch'
+
 import MainLayout from '../comps/layout'
 
-const Content = props => (
-  <div>
-    <h1>{props.title}</h1>
-    <p>This is the blog post content.</p>
-  </div>
+const Post = props => (
+  <MainLayout>
+    <h1>{props.show.name}</h1>
+    <p>{props.show.summary.replace(/<[/]?\w+>/g, '')}</p>
+    <img src={props.show.image.medium}/>
+  </MainLayout>
 )
 
-const Page = withRouter(props => (
-  <MainLayout>
-    <Content title={props.router.query.title}/>
-  </MainLayout>
-))
+Post.getInitialProps = async context => {
+  const { id } = context.query
+  const res = await fetch(`https://api.tvmaze.com/shows/${id}`)
+  const show = await res.json()
 
-export default Page
+  console.log(`> Fetched show: ${show.name}`)
+
+  return { show }
+}
+
+export default Post
